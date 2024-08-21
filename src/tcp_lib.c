@@ -17,7 +17,6 @@ int tcp_connect(const char *host, int port) {
 
     struct sockaddr_in server_addr;                // Define a structure to hold the server address information
     memset(&server_addr, 0, sizeof(server_addr));  // Clear the server_addr structure by setting all bytes to 0
-    
     server_addr.sin_family = AF_INET;              // Set the address family to IPv4
     server_addr.sin_port = htons(port);            // Set the server port, converting it to network byte order using `htons`
 
@@ -49,6 +48,6 @@ int tcp_receive(int sockfd, char *buffer, int buffer_len) {
 }
 
 // Closes the TCP socket
-int tcp_close(int sockfd) {
-    close(sockfd);                          // Close the socket
+void tcp_close(int sockfd) {
+    close(sockfd);                                 // Close the socket
 }
