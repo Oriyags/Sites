@@ -50,5 +50,5 @@ int tcp_receive(int sockfd, char *buffer, int buffer_len) {
 
 // Closes the TCP socket
 int tcp_close(int sockfd) {
-    return close(sockfd);                          // Close the socket
+    close(sockfd);                          // Close the socket
 }
