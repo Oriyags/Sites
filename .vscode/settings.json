@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "tcp_lib.h": "c"
+        "tcp_lib.h": "c",
+        "socket.h": "c",
+        "unistd.h": "c"
     }
 }

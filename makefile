@@ -1,16 +1,16 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -Iinc  # Add -Iinc to tell the compiler to look in the 'inc' directory for headers
+BIN_DIR = bin
 
-all: main
+all: $(BIN_DIR)/tcp_lib.o $(BIN_DIR)/udp_lib.o
 
-main: main.c tcp_lib.o udp_lib.o
-	$(CC) $(CFLAGS) -o main main.c tcp_lib.o udp_lib.o
+$(BIN_DIR)/tcp_lib.o: src/tcp_lib.c inc/tcp_lib.h
+	@mkdir -p $(BIN_DIR)  # Create the bin directory if it doesn't exist
+	$(CC) $(CFLAGS) -c src/tcp_lib.c -o $(BIN_DIR)/tcp_lib.o
 
-tcp_lib.o: tcp_lib.c tcp_lib.h
-	$(CC) $(CFLAGS) -c tcp_lib.c
-
-udp_lib.o: udp_lib.c udp_lib.h
-	$(CC) $(CFLAGS) -c udp_lib.c
+$(BIN_DIR)/udp_lib.o: src/udp_lib.c inc/udp_lib.h
+	@mkdir -p $(BIN_DIR)  # Create the bin directory if it doesn't exist
+	$(CC) $(CFLAGS) -c src/udp_lib.c -o $(BIN_DIR)/udp_lib.o
 
 clean:
-	rm -f *.o main
+	rm -rf $(BIN_DIR) main
