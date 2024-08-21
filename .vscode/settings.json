@@ -2,6 +2,7 @@
     "files.associations": {
         "tcp_lib.h": "c",
         "socket.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "string.h": "c"
     }
 }
