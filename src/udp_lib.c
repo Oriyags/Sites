@@ -1,4 +1,4 @@
-#include <udp_lib.h>
+#include "udp_lib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +7,7 @@
 
 // Establishes a UDP connection to a specified host and port
 int udp_connect(const char *host, int port) {
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);    // create a socket
+    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);    // create a socket
 
     // Check if socket creation failed
     if (sockfd < 0) {
