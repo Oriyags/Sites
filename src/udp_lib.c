@@ -33,6 +33,8 @@ int udp_connect(const char *host, int port) {
         close(sockfd);                              // Close the socket
         return -1;                                  // Return -1 to indicate an error
     }
+
+    return sockfd;
 }
 
 // Sends data over a connected TCP socket
