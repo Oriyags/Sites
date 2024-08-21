@@ -1,9 +1,10 @@
-#include <tcp_lib.h>
-#include <udp_lib.h>
+#include "tcp_lib.h"
+#include "udp_lib.h"
 #include <stdio.h>
+#include <string.h>
 
 int main() {
-    const char host = "127.0.0.1";
+    const char *host = "127.0.0.1";
     int port = 8080;
 
     // Test TCP

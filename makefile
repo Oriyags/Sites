@@ -1,16 +1,49 @@
-CC = gcc
-CFLAGS = -Wall -Iinc  # Add -Iinc to tell the compiler to look in the 'inc' directory for headers
-BIN_DIR = bin
+# Define main directories
+SRC_DIR := src
+BIN_DIR := bin
+INC_DIR := inc
 
-all: $(BIN_DIR)/tcp_lib.o $(BIN_DIR)/udp_lib.o
+# Find C sources and object files
+SRCS := $(shell find $(SRC_DIR) -name '*.c')
+OBJS := $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRCS))
 
-$(BIN_DIR)/tcp_lib.o: src/tcp_lib.c inc/tcp_lib.h
-	@mkdir -p $(BIN_DIR)  # Create the bin directory if it doesn't exist
-	$(CC) $(CFLAGS) -c src/tcp_lib.c -o $(BIN_DIR)/tcp_lib.o
+# Define compiler setting
+CC      := gcc
+CFLAGS  := -I$(INC_DIR) -g -Wall -Wextra
+BIN_OUT := $(BIN_DIR)/Program.elf
 
-$(BIN_DIR)/udp_lib.o: src/udp_lib.c inc/udp_lib.h
-	@mkdir -p $(BIN_DIR)  # Create the bin directory if it doesn't exist
-	$(CC) $(CFLAGS) -c src/udp_lib.c -o $(BIN_DIR)/udp_lib.o
 
+_all: $(BIN_OUT)
+
+# Compile source files to objects
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.c
+	mkdir -p ${shell dirname $@}
+	gcc ${CFLAGS} -c -o $@ $<
+
+# Link objects to create final image
+$(BIN_OUT): $(OBJS)
+	gcc ${CFLAGS} -o $@ $^
+
+
+# Clean binary
 clean:
-	rm -rf $(BIN_DIR) main
+	rm -rf $(BIN_DIR)
+
+# Execute program
+run: $(BIN_OUT)
+	$< ${ARGS}
+
+# Recompile program
+re: clean $(BIN_OUT)
+
+# Recompile program and execute
+rer: clean run
+
+# Recompile program and execute via a debugger
+rerd: clean rund
+
+# Execute program via a debugger
+rund: $(BIN_OUT)
+	gdb -ex 'layout src' ${GDBF} --args $< ${ARGS}
+
+.PHONY: _all clean run re rer rerd rund
