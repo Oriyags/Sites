@@ -1,5 +1,5 @@
-#if !defined(TCP_LIB_H)
-#define TCP_LIB_H
+#if !defined(TCP_CLIENT_H)
+#define TCP_CLIENT_H
 
 #include <sys/types.h>
 #include <sys/socket.h>

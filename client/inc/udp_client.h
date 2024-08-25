@@ -1,5 +1,5 @@
-#if !defined(UDP_LIB_H)
-#define UDP_LIB_H
+#if !defined(UDP_CLIENT_H)
+#define UDP_CLIENT_H
 
 #include <sys/types.h>
 #include <sys/socket.h>
