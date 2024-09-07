@@ -1,5 +1,5 @@
-#include "tcp_lib.h"
-#include "udp_lib.h"
+#include "tcp_client.h"
+#include "udp_client.h"
 #include <stdio.h>
 #include <string.h>
 
