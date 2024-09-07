@@ -1,9 +1,8 @@
-#include "udp_client.h"
+#include "../../library/sockets_lib.h"
+#include "tcp_client.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 
 // Establishes a UDP connection to a specified host and port
 int udp_connect(const char *host, int port) {

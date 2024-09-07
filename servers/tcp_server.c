@@ -1,8 +1,7 @@
+#include "../library/sockets_lib.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <arpa/inet.h>
+#include <string.h>
 
 int main() {
     int server_fd, new_socket;                   // Variables to store the file descriptors

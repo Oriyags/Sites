@@ -33,4 +33,10 @@ ssize_t my_recv(int fd, void *buff, size_t len, int flags);
 // Close the socket
 int my_close(int fd);
 
+int my_setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen);
+
+int my_getsockopt(int fd, int level, int optname, void *optval, socklen_t *optlen);
+
+int my_set_timeout(int fd, int sec, int usec);  // Set receive/send timeouts
+
 #endif
