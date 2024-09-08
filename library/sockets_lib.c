@@ -1,128 +1,165 @@
 #include "sockets_lib.h"
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/syscall.h>
 
-// A structure to hold socket information
-typedef struct {
-    int domain;                                       // Address domain (e.g., AF_INET for IPv4)
-    int type;                                         // Socket type (e.g., SOCK_STREAM for TCP)
-    int protocol;                                     // Protocol (usually 0, which lets the system choose the default)
-    int fd;                                           // File descriptor (mocked, since this is a conceptual implementation)
-    struct sockaddr_in addr;                          // Structure to hold socket address information
-} my_socket_t;
-
-#define MAX_SOCKETS 1024                              // Define the maximum number of sockets the system can handle
-static my_socket_t socket_table[MAX_SOCKETS];         // Simple table to hold socket information
-
-static int next_fd = 0;                               // Simple counter to mimic file descriptors (increments with each new socket)
-
-// Initialize the socket table
-static void init_socket_table() {
-    memset(socket_table, 0, sizeof(socket_table));    // Clear the socket table to zero out all entries
+// Helper function to print errors
+void my_perror(const char *s) {
+    perror(s);
 }
 
-// Find a free slot in the socket table
-static int allocate_socket() {
-    for (int i = 0; i < MAX_SOCKETS; i++) {           // Loop through the socket table
-        if (socket_table[i].fd == 0) {                // Look for an empty slot (where fd is 0)
-            socket_table[i].fd = ++next_fd;           // Assign a new file descriptor (incrementing next_fd)
-            return i;                                 // Return the index of the allocated slot
-        }
+// Memory Functions
+void *my_memset(void *s, int c, size_t n) {
+    unsigned char *p = s;
+    while (n--) {
+        *p++ = (unsigned char)c;
     }
-    return -1;                                        // Return -1 if no available slots are found
+    return s;
 }
 
-// Create a socket
+// Byte Order Functions
+uint32_t my_htonl(uint32_t hostlong) {
+    return ((hostlong & 0xff) << 24) |
+           ((hostlong & 0xff00) << 8) |
+           ((hostlong & 0xff0000) >> 8) |
+           ((hostlong & 0xff000000) >> 24);
+}
+
+uint16_t my_htons(uint16_t hostshort) {
+    return (hostshort >> 8) | (hostshort << 8);
+}
+
+uint32_t my_ntohl(uint32_t netlong) {
+    return my_htonl(netlong);
+}
+
+uint16_t my_ntohs(uint16_t netshort) {
+    return my_htons(netshort);
+}
+
+// Socket Management Functions
 int my_socket(int domain, int type, int protocol) {
-    int index = allocate_socket();                    // Try to allocate a slot in the socket table
-    if (index < 0) {                                  // Check if allocation failed
-        errno = ENOMEM;                               // Set errno to ENOMEM to indicate memory allocation error
-        perror("Socket allocation failed");           // Print an error message
-        return MY_SOCKET_ERROR;                       // Return an error code (presumably defined in sockets_lib.h)
+    // Use system call to create a socket descriptor
+    int sockfd = syscall(__NR_socket, domain, type, protocol);
+    if (sockfd < 0) {
+        my_perror("my_socket");
     }
-
-    socket_table[index].domain = domain;              // Store the domain in the socket structure
-    socket_table[index].type = type;                  // Store the type in the socket structure
-    socket_table[index].protocol = protocol;          // Store the protocol in the socket structure
-
-    return socket_table[index].fd;                    // Return the file descriptor of the new socket
+    return sockfd;
 }
 
-// Bind a socket to an address
-int my_bind(int fd, const struct sockaddr *addr, socklen_t addrlen) {
-    my_socket_t *sock = NULL;                         // Pointer to store the socket structure
-    for (int i = 0; i < MAX_SOCKETS; i++) {           // Loop through the socket table
-        if (socket_table[i].fd == fd) {               // Find the socket with the matching file descriptor
-            sock = &socket_table[i];                  // Store the pointer to this socket
-            break;                                    // Exit the loop once found
-        }
+int my_bind(int sockfd, const void *addr, uint32_t addrlen) {
+    // Use system call to bind the socket
+    int result = syscall(__NR_bind, sockfd, addr, addrlen);
+    if (result < 0) {
+        my_perror("my_bind");
     }
+    return result;
+}
 
-    if (sock == NULL) {                               // Check if the socket was not found
-        errno = EBADF;                                // Set errno to EBADF to indicate bad file descriptor
-        perror("Invalid socket descriptor");          // Print an error message
-        return MY_SOCKET_ERROR;                       // Return an error code
+int my_listen(int sockfd, int backlog) {
+    // Use system call to listen on the socket
+    int result = syscall(__NR_listen, sockfd, backlog);
+    if (result < 0) {
+        my_perror("my_listen");
     }
-
-    // Store the address information in the socket
-    memcpy(&sock->addr, addr, addrlen);               // Copy the address data into the socket's address field
-    return MY_SOCKET_SUCCESS;                         // Return success (presumably defined in sockets_lib.h)
+    return result;
 }
 
-// Mark the socket as passive (conceptual, no real network interaction)
-int my_listen(int fd, int backlog) {
-    // No-op in this conceptual implementation
-    return MY_SOCKET_SUCCESS;                         // Return success, no actual operation performed
-}
-
-// Accept an incoming connection (conceptual, no real network interaction)
-int my_accept(int fd, struct sockaddr *addr, socklen_t *addrlen) {
-    // No-op in this conceptual implementation, just return a new socket descriptor
-    int new_fd = my_socket(AF_INET, SOCK_STREAM, 0);  // Create a new socket as if accepting a connection
-    if (new_fd < 0) {                                 // Check if socket creation failed
-        return MY_SOCKET_ERROR;                       // Return an error code
+int my_accept(int sockfd, void *addr, uint32_t *addrlen) {
+    // Use system call to accept a connection
+    int new_sockfd = syscall(__NR_accept, sockfd, addr, addrlen);
+    if (new_sockfd < 0) {
+        my_perror("my_accept");
     }
-    // Mocking the accept, just copying the address from the original socket
-    if (addr && addrlen) {                            // Check if the address pointers are valid
-        for (int i = 0; i < MAX_SOCKETS; i++) {       // Loop through the socket table
-            if (socket_table[i].fd == fd) {           // Find the original socket
-                memcpy(addr, &socket_table[i].addr, *addrlen);  // Copy the address data
-                break;                                // Exit the loop once done
-            }
-        }
+    return new_sockfd;
+}
+
+int my_connect(int sockfd, const void *addr, uint32_t addrlen) {
+    // Use system call to connect the socket
+    int result = syscall(__NR_connect, sockfd, addr, addrlen);
+    if (result < 0) {
+        my_perror("my_connect");
     }
-    return new_fd;                                    // Return the file descriptor of the new socket
+    return result;
 }
 
-// Connect to a server (conceptual, no real network interaction)
-int my_connect(int fd, const struct sockaddr *addr, socklen_t addrlen) {
-    // No-op in this conceptual implementation
-    return MY_SOCKET_SUCCESS;                         // Return success, no actual operation performed
-}
-
-// Send data over the socket (conceptual, no real network interaction)
-ssize_t my_send(int fd, const void *buff, size_t len, int flags) {
-    // No-op in this conceptual implementation, just return the length of the data
-    return len;                                       // Simulate a successful send by returning the number of bytes
-}
-
-// Receive data from the socket (conceptual, no real network interaction)
-ssize_t my_recv(int fd, void *buff, size_t len, int flags) {
-    // No-op in this conceptual implementation, just return 0 to indicate end-of-file
-    return 0;                                         // Simulate end of data by returning 0
-}
-
-// Close the socket
-int my_close(int fd) {
-    for (int i = 0; i < MAX_SOCKETS; i++) {           // Loop through the socket table
-        if (socket_table[i].fd == fd) {               // Find the socket with the matching file descriptor
-            memset(&socket_table[i], 0, sizeof(my_socket_t));  // Clear the socket entry
-            return MY_SOCKET_SUCCESS;                 // Return success
-        }
+int my_close(int sockfd) {
+    // Use system call to close the socket
+    int result = syscall(__NR_close, sockfd);
+    if (result < 0) {
+        my_perror("my_close");
     }
-    errno = EBADF;                                    // Set errno to EBADF to indicate bad file descriptor
-    perror("Invalid socket descriptor");              // Print an error message
-    return MY_SOCKET_ERROR;                           // Return an error code
+    return result;
+}
+
+// Data Transmission Functions
+ssize_t my_send(int sockfd, const void *buf, size_t len, int flags) {
+    // Use system call to send data
+    ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, NULL, 0);
+    if (result < 0) {
+        my_perror("my_send");
+    }
+    return result;
+}
+
+ssize_t my_recv(int sockfd, void *buf, size_t len, int flags) {
+    // Use system call to receive data
+    ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, NULL, NULL);
+    if (result < 0) {
+        my_perror("my_recv");
+    }
+    return result;
+}
+
+ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const void *dest_addr, uint32_t addrlen) {
+    // Use system call to send data to a specific address
+    ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, dest_addr, addrlen);
+    if (result < 0) {
+        my_perror("my_sendto");
+    }
+    return result;
+}
+
+ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr, uint32_t *addrlen) {
+    // Use system call to receive data from a specific address
+    ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, src_addr, addrlen);
+    if (result < 0) {
+        my_perror("my_recvfrom");
+    }
+    return result;
+}
+
+// Network Utility Functions
+int my_inet_pton(int af, const char *src, void *dst) {
+    // Convert IP addresses from text to binary form
+    struct in_addr addr;
+    int result = inet_pton(af, src, &addr);
+    if (result == 1) {
+        my_memset(dst, 0, sizeof(struct in_addr));
+        my_memcpy(dst, &addr, sizeof(struct in_addr));
+    } else if (result == 0) {
+        my_perror("my_inet_pton - Invalid address format");
+    } else {
+        my_perror("my_inet_pton");
+    }
+    return result;
+}
+
+const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size) {
+    // Convert IP addresses from binary to text form
+    const char *result = inet_ntop(af, src, dst, size);
+    if (result == NULL) {
+        my_perror("my_inet_ntop");
+    }
+    return result;
 }
