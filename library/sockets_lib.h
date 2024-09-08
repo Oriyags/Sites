@@ -1,42 +1,32 @@
-#if !defined(SOCKETS_LIB_H)
-#define SOCKETS_LIB_H
+#ifndef MYSOCKET_H
+#define MYSOCKET_H
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <stdint.h>
 
-#define MY_SOCKET_SUCCESS 0
-#define MY_SOCKET_ERROR   -1
-
-// Create a socket
+// Socket Management Functions
 int my_socket(int domain, int type, int protocol);
+int my_bind(int sockfd, const void *addr, uint32_t addrlen);
+int my_listen(int sockfd, int backlog);
+int my_accept(int sockfd, void *addr, uint32_t *addrlen);
+int my_connect(int sockfd, const void *addr, uint32_t addrlen);
+int my_close(int sockfd);
 
-// Bind a socket to an address
-int my_bind(int fd, const struct sockaddr *addr, socklen_t addrlen);
+// Data Transmission Functions
+ssize_t my_send(int sockfd, const void *buf, size_t len, int flags);
+ssize_t my_recv(int sockfd, void *buf, size_t len, int flags);
+ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const void *dest_addr, uint32_t addrlen);
+ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr, uint32_t *addrlen);
 
-// Mark the socket as passive and ready to accept connections
-int my_listen(int fd, int backlog);
+// Network Utility Functions
+uint32_t my_htonl(uint32_t hostlong);
+uint16_t my_htons(uint16_t hostshort);
+uint32_t my_ntohl(uint32_t netlong);
+uint16_t my_ntohs(uint16_t netshort);
+int my_inet_pton(int af, const char *src, void *dst);
+const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size);
 
-// Accept an incoming connection
-int my_accept(int fd, struct sockaddr *addr, socklen_t *addrlen);
+// Memory and Error Handling Functions
+void *my_memset(void *s, int c, size_t n);
+void my_perror(const char *s);
 
-// Connect to a server
-int my_connect(int fd, const struct sockaddr *addr, socklen_t addrlen);
-
-// Send data over the socket
-ssize_t my_send(int fd, const void *buff, size_t len, int flags);
-
-// Receive data from the socket
-ssize_t my_recv(int fd, void *buff, size_t len, int flags);
-
-// Close the socket
-int my_close(int fd);
-
-int my_setsockopt(int fd, int level, int optname, const void *optval, socklen_t optlen);
-
-int my_getsockopt(int fd, int level, int optname, void *optval, socklen_t *optlen);
-
-int my_set_timeout(int fd, int sec, int usec);  // Set receive/send timeouts
-
-#endif
+#endif // MYSOCKET_H
