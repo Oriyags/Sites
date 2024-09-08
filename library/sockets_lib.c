@@ -1,21 +1,30 @@
 #include "sockets_lib.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <sys/syscall.h>
+#include <errno.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
+
+// Define necessary constants and structures
+#define AF_INET 2 // Address family for IPv4
+#define INET_ADDRSTRLEN 16 // Max length of IPv4 address string
+
+// Define struct in_addr manually
+struct in_addr {
+    unsigned long s_addr; // Use a single unsigned long to represent the address
+};
 
 // Helper function to print errors
 void my_perror(const char *s) {
-    perror(s);
+    if (s && *s) {
+        write(STDERR_FILENO, s, strlen(s));
+        write(STDERR_FILENO, ": ", 2);
+    }
+
+    const char *error_message = strerror(errno);
+    write(STDERR_FILENO, error_message, strlen(error_message));
+    write(STDERR_FILENO, "\n", 1);
 }
 
 // Memory Functions
@@ -49,7 +58,6 @@ uint16_t my_ntohs(uint16_t netshort) {
 
 // Socket Management Functions
 int my_socket(int domain, int type, int protocol) {
-    // Use system call to create a socket descriptor
     int sockfd = syscall(__NR_socket, domain, type, protocol);
     if (sockfd < 0) {
         my_perror("my_socket");
@@ -58,7 +66,6 @@ int my_socket(int domain, int type, int protocol) {
 }
 
 int my_bind(int sockfd, const void *addr, uint32_t addrlen) {
-    // Use system call to bind the socket
     int result = syscall(__NR_bind, sockfd, addr, addrlen);
     if (result < 0) {
         my_perror("my_bind");
@@ -67,7 +74,6 @@ int my_bind(int sockfd, const void *addr, uint32_t addrlen) {
 }
 
 int my_listen(int sockfd, int backlog) {
-    // Use system call to listen on the socket
     int result = syscall(__NR_listen, sockfd, backlog);
     if (result < 0) {
         my_perror("my_listen");
@@ -76,7 +82,6 @@ int my_listen(int sockfd, int backlog) {
 }
 
 int my_accept(int sockfd, void *addr, uint32_t *addrlen) {
-    // Use system call to accept a connection
     int new_sockfd = syscall(__NR_accept, sockfd, addr, addrlen);
     if (new_sockfd < 0) {
         my_perror("my_accept");
@@ -85,7 +90,6 @@ int my_accept(int sockfd, void *addr, uint32_t *addrlen) {
 }
 
 int my_connect(int sockfd, const void *addr, uint32_t addrlen) {
-    // Use system call to connect the socket
     int result = syscall(__NR_connect, sockfd, addr, addrlen);
     if (result < 0) {
         my_perror("my_connect");
@@ -94,7 +98,6 @@ int my_connect(int sockfd, const void *addr, uint32_t addrlen) {
 }
 
 int my_close(int sockfd) {
-    // Use system call to close the socket
     int result = syscall(__NR_close, sockfd);
     if (result < 0) {
         my_perror("my_close");
@@ -104,7 +107,6 @@ int my_close(int sockfd) {
 
 // Data Transmission Functions
 ssize_t my_send(int sockfd, const void *buf, size_t len, int flags) {
-    // Use system call to send data
     ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, NULL, 0);
     if (result < 0) {
         my_perror("my_send");
@@ -113,7 +115,6 @@ ssize_t my_send(int sockfd, const void *buf, size_t len, int flags) {
 }
 
 ssize_t my_recv(int sockfd, void *buf, size_t len, int flags) {
-    // Use system call to receive data
     ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, NULL, NULL);
     if (result < 0) {
         my_perror("my_recv");
@@ -122,7 +123,6 @@ ssize_t my_recv(int sockfd, void *buf, size_t len, int flags) {
 }
 
 ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const void *dest_addr, uint32_t addrlen) {
-    // Use system call to send data to a specific address
     ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, dest_addr, addrlen);
     if (result < 0) {
         my_perror("my_sendto");
@@ -131,7 +131,6 @@ ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const void
 }
 
 ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr, uint32_t *addrlen) {
-    // Use system call to receive data from a specific address
     ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, src_addr, addrlen);
     if (result < 0) {
         my_perror("my_recvfrom");
@@ -139,27 +138,37 @@ ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr
     return result;
 }
 
-// Network Utility Functions
+// Convert IPv4 address from text to binary form
 int my_inet_pton(int af, const char *src, void *dst) {
-    // Convert IP addresses from text to binary form
-    struct in_addr addr;
-    int result = inet_pton(af, src, &addr);
-    if (result == 1) {
-        my_memset(dst, 0, sizeof(struct in_addr));
-        my_memcpy(dst, &addr, sizeof(struct in_addr));
-    } else if (result == 0) {
+    if (af == AF_INET) {
+        struct in_addr *addr = (struct in_addr *)dst;
+        unsigned int a, b, c, d;
+        if (sscanf(src, "%u.%u.%u.%u", &a, &b, &c, &d) == 4) {
+            addr->s_addr = (a << 24) | (b << 16) | (c << 8) | d;
+            return 1;
+        }
         my_perror("my_inet_pton - Invalid address format");
-    } else {
-        my_perror("my_inet_pton");
+        return 0;
     }
-    return result;
+    my_perror("my_inet_pton - Unsupported address family");
+    return -1;
 }
 
+// Convert IPv4 address from binary to text form
 const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size) {
-    // Convert IP addresses from binary to text form
-    const char *result = inet_ntop(af, src, dst, size);
-    if (result == NULL) {
-        my_perror("my_inet_ntop");
+    if (af == AF_INET) {
+        const struct in_addr *addr = (const struct in_addr *)src;
+        if (size < INET_ADDRSTRLEN) {
+            my_perror("my_inet_ntop - Insufficient buffer size");
+            return NULL;
+        }
+        snprintf(dst, size, "%u.%u.%u.%u",
+                 (addr->s_addr >> 24) & 0xFF,
+                 (addr->s_addr >> 16) & 0xFF,
+                 (addr->s_addr >> 8) & 0xFF,
+                 addr->s_addr & 0xFF);
+        return dst;
     }
-    return result;
+    my_perror("my_inet_ntop - Unsupported address family");
+    return NULL;
 }
