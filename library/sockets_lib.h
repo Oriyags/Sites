@@ -1,7 +1,8 @@
-#ifndef MYSOCKET_H
-#define MYSOCKET_H
+#ifndef SOCKETS_LIB_H
+#define SOCKETS_LIB_H
 
 #include <stdint.h>
+#include <sys/types.h>
 
 // Socket Management Functions
 int my_socket(int domain, int type, int protocol);
