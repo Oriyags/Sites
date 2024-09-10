@@ -1,41 +1,37 @@
-#include "../../library/sockets_lib.h"
-#include "tcp_client.h"
-#include "udp_client.h"
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
+
+void tcp_server();
+void udp_server();
+void tcp_client();
+void udp_client();
 
 int main() {
-    const char *host = "127.0.0.1";
-    int port = 8080;
-
-    // Test TCP
-    int tcp_socket = tcp_connect(host, port);
-    if (tcp_socket >= 0) {
-        const char *message = "Hello, TCP!";
-        tcp_send(tcp_socket, message, strlen(message));
-
-        char buffer[1024];
-        int received = tcp_receive(tcp_socket, buffer, sizeof(buffer));
-        if (received > 0) {
-            buffer[received] = '\0';
-            printf("Received from TCP server: %s\n", buffer);
-        }
-        tcp_close(tcp_socket);
-    }
-
-    // Test UDP
-    int udp_socket = udp_connect(host, port);
-    if (udp_socket >= 0) {
-        const char *message = "Hello, UDP!";
-        udp_send(udp_socket, message, strlen(message));
-
-        char buffer[1024];
-        int received = udp_receive(udp_socket, buffer, sizeof(buffer));
-        if (received > 0) {
-            buffer[received] = '\0';
-            printf("Received from UDP server: %s\n", buffer);
-        }
-        udp_close(udp_socket);
+    int choice;
+    
+    printf("Select an option:\n");
+    printf("1. Run TCP server\n");
+    printf("2. Run UDP server\n");
+    printf("3. Run TCP client\n");
+    printf("4. Run UDP client\n");
+    scanf("%d", &choice);
+    
+    switch (choice) {
+        case 1:
+            tcp_server();
+            break;
+        case 2:
+            udp_server();
+            break;
+        case 3:
+            tcp_client();
+            break;
+        case 4:
+            udp_client();
+            break;
+        default:
+            printf("Invalid option.\n");
+            break;
     }
     
     return 0;

@@ -1,48 +1,44 @@
-#include "../library/sockets_lib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 
-int main() {
-    int server_fd;                                      // Variable to store the file descriptor
-    struct sockaddr_in server_addr, client_addr;        // Structures to hold the server and client address information
-    char buffer[1024];                                  // Buffer to store the data received from the client
-    socklen_t addr_len = sizeof(client_addr);           // Variable to store the size of the client address structure
-    const char *message = "Hello from UDP server";      // Message to be sent to the client
+#define PORT 8080
+#define BUFFER_SIZE 1024
 
-    // Creating a UDP socket using IPv4
-    if ((server_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("socket failed");                        // Print an error message if socket creation fails
-        exit(EXIT_FAILURE);                             // Exit the program with an error code
+void udp_server() {
+    int sockfd;
+    char buffer[BUFFER_SIZE];
+    char *hello = "Hello from UDP server";
+    struct sockaddr_in servaddr, cliaddr;
+    
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("socket creation failed");
+        exit(EXIT_FAILURE);
     }
 
-    // Set the server address information
-    server_addr.sin_family = AF_INET;                   // Set the address family to IPv4
-    server_addr.sin_addr.s_addr = INADDR_ANY;           // Accept connections from any IP address
-    server_addr.sin_port = htons(8081);                 // Set the port number to 8080, converting it to network byte order
+    memset(&servaddr, 0, sizeof(servaddr));
+    memset(&cliaddr, 0, sizeof(cliaddr));
 
-    // Bind the socket to the specified IP address and port
-    if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        perror("bind failed");                          // Print an error message if binding fails
-        close(server_fd);                               // Close the socket
-        exit(EXIT_FAILURE);                             // Exit the program with an error code
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = INADDR_ANY;
+    servaddr.sin_port = htons(PORT);
+
+    if (bind(sockfd, (const struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+        perror("bind failed");
+        close(sockfd);
+        exit(EXIT_FAILURE);
     }
 
-    printf("UDP server is running on port 8080\n");
+    printf("UDP server is waiting for a connection...\n");
+    int len, n;
+    len = sizeof(cliaddr);
+    n = recvfrom(sockfd, (char *)buffer, BUFFER_SIZE, MSG_WAITALL, (struct sockaddr *) &cliaddr, &len);
+    buffer[n] = '\0';
+    printf("Received: %s\n", buffer);
+    sendto(sockfd, hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &cliaddr, len);
+    printf("Hello message sent\n");
 
-    // Loop to handle incoming messages
-    while (1) {
-        // Receive data from the client
-        int n = recvfrom(server_fd, buffer, sizeof(buffer), 0, (struct sockaddr *)&client_addr, &addr_len);
-        buffer[n] = '\0';                              // Null-terminate the received data
-
-        printf("Received from client: %s\n", buffer);  // Print the message received from the client
-
-        // Send a response back to the client
-        sendto(server_fd, message, strlen(message), 0, (struct sockaddr *)&client_addr, addr_len);
-        printf("Sent response to client: %s\n", message);
-    }
-
-    close(server_fd);                                 // Close the server socket
-    return 0;                                         // Return 0 to indicate successful execution
+    close(sockfd);
 }
