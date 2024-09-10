@@ -1,47 +1,10 @@
 #include "sockets_lib.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <errno.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <bits/socket.h>
-
-#define MY_SOCKET_ERROR -1
-
-// Your custom socket structure
-typedef struct {
-    int fd;  // File descriptor for the socket
-    int domain;  // AF_INET for IPv4, AF_INET6 for IPv6, etc.
-    int type;  // SOCK_STREAM for TCP, SOCK_DGRAM for UDP, etc.
-    int protocol;  // Usually 0 for default protocol
-} my_socket_t;
-
-// This is a simplified connect function, assuming the socket is a TCP socket
-int my_connect(my_socket_t *sock, const struct sockaddr *address, socklen_t address_len) {
-    // Check if the socket is valid
-    if (sock == NULL || sock->fd < 0) {
-        errno = EBADF;
-        return MY_SOCKET_ERROR;
-    }
-
-    // Attempt to connect using the file descriptor
-    int result = connect(sock->fd, address, address_len);
-    if (result < 0) {
-        // If the connect fails, return an error code
-        return MY_SOCKET_ERROR;
-    }
-
-    // If successful, return 0
-    return 0;
-}
-
-
-
-//=========================
+#include <sys/syscall.h>
+#include <errno.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdio.h>
 
 // Define necessary constants and structures
 #define AF_INET 2 // Address family for IPv4
