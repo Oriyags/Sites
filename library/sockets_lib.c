@@ -7,12 +7,20 @@
 #include <stdio.h>
 
 // Define necessary constants and structures
-#define AF_INET 2 // Address family for IPv4
-#define INET_ADDRSTRLEN 16 // Max length of IPv4 address string
+#define AF_INET 2   // Address family for IPv4
+#define INET_ADDRSTRLEN 16
 
 // Define struct in_addr manually
 struct in_addr {
     unsigned long s_addr; // Use a single unsigned long to represent the address
+};
+
+// Define struct sockaddr_in manually for IPv4
+struct sockaddr_in {
+    short sin_family;
+    unsigned short sin_port;
+    struct in_addr sin_addr;
+    char sin_zero[8];
 };
 
 // Helper function to print errors
@@ -21,7 +29,6 @@ void my_perror(const char *s) {
         write(STDERR_FILENO, s, strlen(s));
         write(STDERR_FILENO, ": ", 2);
     }
-
     const char *error_message = strerror(errno);
     write(STDERR_FILENO, error_message, strlen(error_message));
     write(STDERR_FILENO, "\n", 1);
@@ -58,6 +65,10 @@ uint16_t my_ntohs(uint16_t netshort) {
 
 // Socket Management Functions
 int my_socket(int domain, int type, int protocol) {
+    if (domain != AF_INET) {
+        my_perror("my_socket - Only AF_INET is supported");
+        return -1;
+    }
     int sockfd = syscall(__NR_socket, domain, type, protocol);
     if (sockfd < 0) {
         my_perror("my_socket");
@@ -138,7 +149,7 @@ ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr
     return result;
 }
 
-// Convert IPv4 address from text to binary form
+// IPv4 support for inet_pton
 int my_inet_pton(int af, const char *src, void *dst) {
     if (af == AF_INET) {
         struct in_addr *addr = (struct in_addr *)dst;
@@ -147,14 +158,14 @@ int my_inet_pton(int af, const char *src, void *dst) {
             addr->s_addr = (a << 24) | (b << 16) | (c << 8) | d;
             return 1;
         }
-        my_perror("my_inet_pton - Invalid address format");
+        my_perror("my_inet_pton - Invalid IPv4 address format");
         return 0;
     }
-    my_perror("my_inet_pton - Unsupported address family");
+    my_perror("my_inet_pton - Only AF_INET is supported");
     return -1;
 }
 
-// Convert IPv4 address from binary to text form
+// IPv4 support for inet_ntop
 const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size) {
     if (af == AF_INET) {
         const struct in_addr *addr = (const struct in_addr *)src;
@@ -169,6 +180,32 @@ const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size) {
                  addr->s_addr & 0xFF);
         return dst;
     }
-    my_perror("my_inet_ntop - Unsupported address family");
+    my_perror("my_inet_ntop - Only AF_INET is supported");
     return NULL;
+}
+
+// Socket Option Management
+int my_setsockopt(int sockfd, int level, int optname, const void *optval, uint32_t optlen) {
+    int result = syscall(__NR_setsockopt, sockfd, level, optname, optval, optlen);
+    if (result < 0) {
+        my_perror("my_setsockopt");
+    }
+    return result;
+}
+
+int my_getsockopt(int sockfd, int level, int optname, void *optval, uint32_t *optlen) {
+    int result = syscall(__NR_getsockopt, sockfd, level, optname, optval, optlen);
+    if (result < 0) {
+        my_perror("my_getsockopt");
+    }
+    return result;
+}
+
+// Control non-blocking mode using fcntl (file control)
+int my_fcntl(int sockfd, int cmd, long arg) {
+    int result = syscall(__NR_fcntl, sockfd, cmd, arg);
+    if (result < 0) {
+        my_perror("my_fcntl");
+    }
+    return result;
 }
