@@ -1,5 +1,5 @@
-#include "../../library/sockets_lib.h"
-#include "tcp_client.h"
+#include "../../../library/sockets_lib.h"
+#include "../inc/tcp_client.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -12,8 +12,10 @@ BASE
 */
 
 // Define necessary constants and structures
-#define AF_INET 2                                                 // Address family for IPv4
-#define INET_ADDRSTRLEN 16                                        // Maximum length for IPv4 address string
+#define AF_INET 2
+#define SOCK_STREAM 1    // Type for TCP
+#define SOCK_DGRAM 2     // Type for UDP
+#define INET_ADDRSTRLEN 16
 
 // Helper function to print errors
 // It prints an error message to STDERR with a description

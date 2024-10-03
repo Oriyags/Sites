@@ -1,5 +1,5 @@
-#include "../../library/sockets_lib.h"
-#include "udp_client.h"
+#include "../../../library/sockets_lib.h"
+#include "../inc/udp_client.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -6,8 +6,6 @@
 #include <stddef.h>
 
 #define AF_INET 2
-#define SOCK_STREAM 1    // Type for TCP
-#define SOCK_DGRAM 2     // Type for UDP
 #define INET_ADDRSTRLEN 16
 
 struct in_addr {

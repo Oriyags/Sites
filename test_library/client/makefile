@@ -2,28 +2,32 @@
 SRC_DIR := src
 BIN_DIR := bin
 INC_DIR := inc
+LIB_DIR := ../../library
 
 # Find C sources and object files
-SRCS := $(shell find $(SRC_DIR) -name '*.c')
+SRCS := $(shell find $(SRC_DIR) -name '*.c') $(LIB_DIR)/sockets_lib.c
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRCS))
+OBJS := $(patsubst $(LIB_DIR)/%.c, $(BIN_DIR)/%.o, $(OBJS))
 
-# Define compiler setting
+# Define compiler settings
 CC      := gcc
-CFLAGS  := -I$(INC_DIR) -g -Wall -Wextra
+CFLAGS  := -I$(INC_DIR) -I$(LIB_DIR) -g -Wall -Wextra
 BIN_OUT := $(BIN_DIR)/Program.elf
-
 
 _all: $(BIN_OUT)
 
 # Compile source files to objects
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
-	mkdir -p ${shell dirname $@}
-	gcc ${CFLAGS} -c -o $@ $<
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(BIN_DIR)/%.o: $(LIB_DIR)/%.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Link objects to create final image
 $(BIN_OUT): $(OBJS)
-	gcc ${CFLAGS} -o $@ $^
-
+	$(CC) $(CFLAGS) -o $@ $^
 
 # Clean binary
 clean:
