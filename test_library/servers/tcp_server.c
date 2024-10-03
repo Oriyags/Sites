@@ -11,8 +11,8 @@ int main() {
     const char *hello = "Hello from server";     // Message sent to the client
 
     // Creating a socket using IPv4
-    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-        perror("socket failed");                 // Print an error message
+    if ((server_fd = my_socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        my_perror("socket failed");                 // Print an error message
         exit(EXIT_FAILURE);                      // Exit the program
     }
 
@@ -21,23 +21,23 @@ int main() {
     address.sin_port = htons(8080);              // Set the port number to 8080, converting it to network byte order
 
     // Bind the socket to the specified IP address and port
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        perror("bind failed");                   // Print an error message
-        close(server_fd);                        // Close the socket
+    if (my_bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        my_perror("bind failed");                   // Print an error message
+        my_close(server_fd);                        // Close the socket
         exit(EXIT_FAILURE);                      // Exit the program
     }
 
     // Listen for incoming connections
-    if (listen(server_fd, 3) < 0) {              // Listen for up to 3 pending connections
-        perror("listen");                        // Print an error message
-        close(server_fd);                        // Close the socket
+    if (my_listen(server_fd, 3) < 0) {              // Listen for up to 3 pending connections
+        my_perror("listen");                        // Print an error message
+        my_close(server_fd);                        // Close the socket
         exit(EXIT_FAILURE);                      // Exit the program
     }
 
     // Accept an incoming connection
-    if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addr_len)) < 0) {
-        perror("accept");                        // Print an error message
-        close(server_fd);                        // Close the server socket
+    if ((new_socket = my_accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addr_len)) < 0) {
+        my_perror("accept");                        // Print an error message
+        my_close(server_fd);                        // Close the server socket
         exit(EXIT_FAILURE);                      // Exit the program
     }
 
@@ -46,10 +46,10 @@ int main() {
     printf("Message from client: %s\n", buffer); // Print the message received from the client
 
     // Send a message to the client
-    send(new_socket, hello, strlen(hello), 0);   // Send the message to the client
+    my_send(new_socket, hello, strlen(hello), 0);   // Send the message to the client
     printf("Hello message sent\n");              // Print confirmation that the message was sent
 
-    close(new_socket);                           // Close the connection socket
-    close(server_fd);                            // Close the server socket
+    my_close(new_socket);                           // Close the connection socket
+    my_close(server_fd);                            // Close the server socket
     return 0;                                    // Return 0 to indicate successful execution
 }

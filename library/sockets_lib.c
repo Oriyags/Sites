@@ -6,9 +6,14 @@
 #include <string.h>
 #include <stdio.h>
 
+/*
+BASE
+[Hardware <- OS <- syscalls] <- [data <- protocols <- network layers]
+*/
+
 // Define necessary constants and structures
-#define AF_INET 2   // Address family for IPv4
-#define INET_ADDRSTRLEN 16  // Maximum length for IPv4 address string
+#define AF_INET 2                                                 // Address family for IPv4
+#define INET_ADDRSTRLEN 16                                        // Maximum length for IPv4 address string
 
 // Define struct in_addr manually
 // This represents an IPv4 address
@@ -19,21 +24,21 @@ struct in_addr {
 // Define struct sockaddr_in manually for IPv4
 // This represents an IPv4 socket address
 struct sockaddr_in {
-    short sin_family;      // Address family (AF_INET)
-    unsigned short sin_port;  // Port number
-    struct in_addr sin_addr;  // IPv4 address
-    char sin_zero[8];       // Padding to make the size of the struct equal to struct sockaddr
+    short sin_family;                                             // Address family (AF_INET)
+    unsigned short sin_port;                                      // Port number
+    struct in_addr sin_addr;                                      // IPv4 address
+    char sin_zero[8];                                             // Padding to make the size of the struct equal to struct sockaddr
 };
 
 // Helper function to print errors
 // It prints an error message to STDERR with a description
 void my_perror(const char *s) {
-    if (s && *s) {
-        write(STDERR_FILENO, s, strlen(s));  // Print the error message prefix
-        write(STDERR_FILENO, ": ", 2);        // Print ": " after the prefix
-    }
-    const char *error_message = strerror(errno); // Get the error message based on errno
-    write(STDERR_FILENO, error_message, strlen(error_message)); // Print the error message
+    if (s && *s) { 
+        write(STDERR_FILENO, s, strlen(s));                       // Print the error message prefix
+        write(STDERR_FILENO, ": ", 2);                            // Print ": " after the prefix
+    } 
+    const char *error_message = strerror(errno);                  // Get the error message based on errno
+    write(STDERR_FILENO, error_message, strlen(error_message));   // Print the error message
     write(STDERR_FILENO, "\n", 1);  // Print a newline character
 }
 
@@ -63,7 +68,7 @@ uint16_t my_htons(uint16_t hostshort) {
 
 // Convert a 32-bit value from network byte order to host byte order
 uint32_t my_ntohl(uint32_t netlong) {
-    return my_htonl(netlong);  // Network byte order is big-endian
+    return my_htonl(netlong);                                     // Network byte order is big-endian
 }
 
 // Convert a 16-bit value from network byte order to host byte order
@@ -75,10 +80,10 @@ uint16_t my_ntohs(uint16_t netshort) {
 // Create a socket with the specified domain, type, and protocol
 int my_socket(int domain, int type, int protocol) {
     if (domain != AF_INET) {  // Check if the domain is AF_INET
-        my_perror("my_socket - Only AF_INET is supported");  // Print an error message
+        my_perror("my_socket - Only AF_INET is supported");       // Print an error message
         return -1;  // Return -1 to indicate failure
     }
-    int sockfd = syscall(__NR_socket, domain, type, protocol);  // Call the syscall to create the socket
+    int sockfd = syscall(__NR_socket, domain, type, protocol);    // Call the syscall to create the socket
     if (sockfd < 0) {
         my_perror("my_socket");  // Print an error message if socket creation fails
     }
@@ -87,7 +92,7 @@ int my_socket(int domain, int type, int protocol) {
 
 // Bind a socket to a specific address and port
 int my_bind(int sockfd, const void *addr, uint32_t addrlen) {
-    int result = syscall(__NR_bind, sockfd, addr, addrlen);  // Call the syscall to bind the socket
+    int result = syscall(__NR_bind, sockfd, addr, addrlen);       // Call the syscall to bind the socket
     if (result < 0) {
         my_perror("my_bind");  // Print an error message if bind fails
     }
@@ -96,7 +101,7 @@ int my_bind(int sockfd, const void *addr, uint32_t addrlen) {
 
 // Listen for incoming connections on a socket
 int my_listen(int sockfd, int backlog) {
-    int result = syscall(__NR_listen, sockfd, backlog);  // Call the syscall to listen on the socket
+    int result = syscall(__NR_listen, sockfd, backlog);           // Call the syscall to listen on the socket
     if (result < 0) {
         my_perror("my_listen");  // Print an error message if listen fails
     }
@@ -105,7 +110,7 @@ int my_listen(int sockfd, int backlog) {
 
 // Accept an incoming connection on a socket
 int my_accept(int sockfd, void *addr, uint32_t *addrlen) {
-    int new_sockfd = syscall(__NR_accept, sockfd, addr, addrlen);  // Call the syscall to accept a connection
+    int new_sockfd = syscall(__NR_accept, sockfd, addr, addrlen); // Call the syscall to accept a connection
     if (new_sockfd < 0) {
         my_perror("my_accept");  // Print an error message if accept fails
     }
@@ -114,26 +119,26 @@ int my_accept(int sockfd, void *addr, uint32_t *addrlen) {
 
 // Connect to a remote address using a socket
 int my_connect(int sockfd, const void *addr, uint32_t addrlen) {
-    int result = syscall(__NR_connect, sockfd, addr, addrlen);  // Call the syscall to connect the socket
+    int result = syscall(__NR_connect, sockfd, addr, addrlen);    // Call the syscall to connect the socket
     if (result < 0) {
-        my_perror("my_connect");  // Print an error message if connect fails
+        my_perror("my_connect");                                  // Print an error message if connect fails
     }
     return result;  // Return the result of the connect operation
 }
 
 // Close a socket
 int my_close(int sockfd) {
-    int result = syscall(__NR_close, sockfd);  // Call the syscall to close the socket
+    int result = syscall(__NR_close, sockfd);                     // Call the syscall to close the socket
     if (result < 0) {
-        my_perror("my_close");  // Print an error message if close fails
+        my_perror("my_close");                                    // Print an error message if close fails
     }
-    return result;  // Return the result of the close operation
+    return result;
 }
 
 // Data Transmission Functions
 // Send data on a socket
 ssize_t my_send(int sockfd, const void *buf, size_t len, int flags) {
-    ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, NULL, 0);  // Call the syscall to send data
+    ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, NULL, 0);
     if (result < 0) {
         my_perror("my_send");  // Print an error message if send fails
     }
@@ -142,16 +147,16 @@ ssize_t my_send(int sockfd, const void *buf, size_t len, int flags) {
 
 // Receive data from a socket
 ssize_t my_recv(int sockfd, void *buf, size_t len, int flags) {
-    ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, NULL, NULL);  // Call the syscall to receive data
+    ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, NULL, NULL);
     if (result < 0) {
         my_perror("my_recv");  // Print an error message if receive fails
     }
-    return result;  // Return the number of bytes received
+    return result;
 }
 
 // Send data to a specific address using a socket
 ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const void *dest_addr, uint32_t addrlen) {
-    ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, dest_addr, addrlen);  // Call the syscall to send data
+    ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, dest_addr, addrlen);
     if (result < 0) {
         my_perror("my_sendto");  // Print an error message if sendto fails
     }
@@ -160,11 +165,11 @@ ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const void
 
 // Receive data from a specific address using a socket
 ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr, uint32_t *addrlen) {
-    ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, src_addr, addrlen);  // Call the syscall to receive data
+    ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, src_addr, addrlen); 
     if (result < 0) {
         my_perror("my_recvfrom");  // Print an error message if recvfrom fails
     }
-    return result;  // Return the number of bytes received
+    return result;
 }
 
 // IPv4 support for inet_pton

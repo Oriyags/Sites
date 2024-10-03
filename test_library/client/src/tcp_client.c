@@ -15,28 +15,28 @@ void tcp_client() {
     char *hello = "Hello from TCP client";
     char buffer[BUFFER_SIZE] = {0};
 
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((sock = my_socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
         return;
     }
 
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
+    serv_addr.sin_port = my_htons(PORT);
        
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
+    if (my_inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
         printf("\nInvalid address/ Address not supported \n");
         return;
     }
 
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    if (my_connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         printf("\nConnection Failed \n");
         return;
     }
 
-    send(sock, hello, strlen(hello), 0);
+    my_send(sock, hello, strlen(hello), 0);
     printf("Hello message sent\n");
     int valread = read(sock, buffer, BUFFER_SIZE);
     printf("Received: %s\n", buffer);
 
-    close(sock);
+    my_close(sock);
 }
