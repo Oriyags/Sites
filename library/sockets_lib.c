@@ -15,21 +15,6 @@ BASE
 #define AF_INET 2                                                 // Address family for IPv4
 #define INET_ADDRSTRLEN 16                                        // Maximum length for IPv4 address string
 
-// Define struct in_addr manually
-// This represents an IPv4 address
-struct in_addr {
-    unsigned long s_addr; // IPv4 address as a single unsigned long
-};
-
-// Define struct sockaddr_in manually for IPv4
-// This represents an IPv4 socket address
-struct sockaddr_in {
-    short sin_family;                                             // Address family (AF_INET)
-    unsigned short sin_port;                                      // Port number
-    struct in_addr sin_addr;                                      // IPv4 address
-    char sin_zero[8];                                             // Padding to make the size of the struct equal to struct sockaddr
-};
-
 // Helper function to print errors
 // It prints an error message to STDERR with a description
 void my_perror(const char *s) {
