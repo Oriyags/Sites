@@ -4,19 +4,34 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <unistd.h>
+#include <stdio.h>   
+#include <stdlib.h>
+#include <string.h>
 
 #define AF_INET 2
+#define SOCK_STREAM 1
+#define SOCK_DGRAM 2
 #define INET_ADDRSTRLEN 16
+#define INADDR_ANY ((unsigned long) 0x00000000)
 
-struct in_addr {
-    unsigned long s_addr;
+#define SOL_SOCKET 1
+#define SO_REUSEADDR 2
+#define MY_SOCK_CLOSED -1
+
+typedef unsigned short my_uint16_t;
+typedef unsigned int my_uint32_t;
+typedef unsigned int socklen_t;
+
+struct my_in_addr {
+    my_uint32_t s_addr;
 };
 
-struct sockaddr_in {
-    short sin_family;
-    unsigned short sin_port;
-    struct in_addr sin_addr;
-    char sin_zero[8];
+struct my_sockaddr_in {
+    my_uint16_t sin_family;       
+    my_uint16_t sin_port;         
+    struct my_in_addr sin_addr;         
+    unsigned char sin_zero[8];    
 };
 
 
@@ -46,5 +61,7 @@ int my_setsockopt(int sockfd, int level, int optname, const void *optval, uint32
 int my_getsockopt(int sockfd, int level, int optname, void *optval, uint32_t *optlen);
 
 int my_fcntl(int sockfd, int cmd, long arg);
+
+void my_perror(const char *s);
 
 #endif
