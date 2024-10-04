@@ -1,11 +1,11 @@
-#include "../../library/sockets_lib.h"
+#include "sockets_lib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 int main() {
     int server_fd;                                      // Variable to store the file descriptor
-    struct sockaddr_in server_addr, client_addr;        // Structures to hold the server and client address information
+    struct my_sockaddr_in server_addr, client_addr;        // Structures to hold the server and client address information
     char buffer[1024];                                  // Buffer to store the data received from the client
     socklen_t addr_len = sizeof(client_addr);           // Variable to store the size of the client address structure
     const char *message = "Hello from UDP server";      // Message to be sent to the client
@@ -15,7 +15,7 @@ int main() {
         my_perror("socket failed");                        // Print an error message if socket creation fails
         exit(EXIT_FAILURE);                             // Exit the program with an error code
     }
-
+    
     // Set the server address information
     server_addr.sin_family = AF_INET;                   // Set the address family to IPv4
     server_addr.sin_addr.s_addr = INADDR_ANY;           // Accept connections from any IP address
