@@ -163,10 +163,10 @@ ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr
 // Convert an IPv4 address from presentation format to network format
 int my_inet_pton(int af, const char *src, void *dst) {
     if (af == AF_INET) {  // Check if the address family is AF_INET
-        struct in_addr *addr = (struct in_addr *)dst;  // Cast destination to in_addr
+        struct my_in_addr *addr = (struct my_in_addr *)dst;  // Cast destination to my_in_addr
         unsigned int a, b, c, d;
         if (sscanf(src, "%u.%u.%u.%u", &a, &b, &c, &d) == 4) {  // Parse the IPv4 address
-            addr->s_addr = (a << 24) | (b << 16) | (c << 8) | d;  // Convert to network format
+            addr->s_addr = my_htonl((a << 24) | (b << 16) | (c << 8) | d); // Convert to network format
             return 1;  // Return 1 to indicate success
         }
         my_perror("my_inet_pton - Invalid IPv4 address format");  // Print an error message if the format is invalid
@@ -180,16 +180,16 @@ int my_inet_pton(int af, const char *src, void *dst) {
 // Convert an IPv4 address from network format to presentation format
 const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size) {
     if (af == AF_INET) {  // Check if the address family is AF_INET
-        const struct in_addr *addr = (const struct in_addr *)src;  // Cast source to in_addr
+        const struct my_in_addr *addr = (const struct my_in_addr *)src;  // Cast source to my_in_addr
         if (size < INET_ADDRSTRLEN) {  // Check if the buffer size is sufficient
             my_perror("my_inet_ntop - Insufficient buffer size");  // Print an error message if the buffer is too small
             return NULL;  // Return NULL to indicate failure
         }
         snprintf(dst, size, "%u.%u.%u.%u",
-                 (addr->s_addr >> 24) & 0xFF,
-                 (addr->s_addr >> 16) & 0xFF,
-                 (addr->s_addr >> 8) & 0xFF,
-                 addr->s_addr & 0xFF);  // Format the address as a string
+                 (my_ntohl(addr->s_addr) >> 24) & 0xFF,
+                 (my_ntohl(addr->s_addr) >> 16) & 0xFF,
+                 (my_ntohl(addr->s_addr) >> 8) & 0xFF,
+                 my_ntohl(addr->s_addr) & 0xFF);  // Format the address as a string
         return dst;  // Return the address string
     }
     my_perror("my_inet_ntop - Only AF_INET is supported");  // Print an error message if address family is not AF_INET
