@@ -9,11 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define AF_INET 2
-#define SOCK_STREAM 1
-#define SOCK_DGRAM 2
-#define INET_ADDRSTRLEN 16
-#define INADDR_ANY ((unsigned long) 0x00000000)
+// #define AF_INET 2
+// #define SOCK_STREAM 1
+// #define SOCK_DGRAM 2
+// #define INET_ADDRSTRLEN 16
+// #define INADDR_ANY ((unsigned long) 0x00000000)
 
 #define SOL_SOCKET 1
 #define SO_REUSEADDR 2
