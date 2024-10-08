@@ -6,11 +6,10 @@
 
 #define PORT 8080
 
-int main() {
+int udp_connect_send_receive(const char *message) {
     int sockfd;
     struct my_sockaddr_in servaddr;
     char buffer[1024] = {0};
-    const char *message = "Hello from UDP client";
 
     if ((sockfd = my_socket(MY_AF_INET, MY_SOCK_DGRAM, 0)) < 0) {
         my_perror("Socket creation failed");
