@@ -9,14 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-// #define AF_INET 2
-// #define SOCK_STREAM 1
-// #define SOCK_DGRAM 2
-// #define INET_ADDRSTRLEN 16
-// #define INADDR_ANY ((unsigned long) 0x00000000)
+#define MY_AF_INET 2
+#define MY_SOCK_STREAM 1
+#define MY_SOCK_DGRAM 2
+#define MY_INET_ADDRSTRLEN 16
+#define MY_INADDR_ANY ((unsigned long) 0x00000000)
 
-#define SOL_SOCKET 1
-#define SO_REUSEADDR 2
+#define MY_SOL_SOCKET 1
+#define MY_SO_REUSEADDR 2
 #define MY_SOCK_CLOSED -1
 
 typedef unsigned short my_uint16_t;
