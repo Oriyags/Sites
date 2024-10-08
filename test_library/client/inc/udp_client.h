@@ -5,9 +5,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-int udp_connect(const char *host, int port);
-int udp_send(int sockfd, const char *data, int len);
-int udp_receive(int sockfd, char *buffer, int buffer_len);
-void udp_close(int sockfd);
+int my_connect(const char *host, int port);
+int my_send(int sockfd, const char *data, int len);
+int my_receive(int sockfd, char *buffer, int buffer_len);
+void my_close(int sockfd);
 
 #endif
