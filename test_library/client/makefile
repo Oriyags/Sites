@@ -1,53 +1,43 @@
-# Define main directories
-SRC_DIR := src
-BIN_DIR := bin
-INC_DIR := inc
-LIB_DIR := ../../library
+# Compiler and flags
+CC = gcc
+CFLAGS = -Iinc -I../../library -g -Wall -Wextra
 
-# Find C sources and object files
-SRCS := $(shell find $(SRC_DIR) -name '*.c') $(LIB_DIR)/sockets_lib.c
-OBJS := $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SRCS))
-OBJS := $(patsubst $(LIB_DIR)/%.c, $(BIN_DIR)/%.o, $(OBJS))
+# Directories
+BIN_DIR = bin
+SRC_DIR = src
+LIB_DIR = ../../library
 
-# Define compiler settings
-CC      := gcc
-CFLAGS  := -I$(INC_DIR) -I$(LIB_DIR) -g -Wall -Wextra
-BIN_OUT := $(BIN_DIR)/Program.elf
+# Source files
+SRC_FILES = $(SRC_DIR)/main.c $(SRC_DIR)/tcp_client.c $(SRC_DIR)/udp_client.c
+OBJ_FILES = $(BIN_DIR)/main.o $(BIN_DIR)/tcp_client.o $(BIN_DIR)/udp_client.o $(BIN_DIR)/sockets_lib.o
 
-_all: $(BIN_OUT)
+# Output binary
+OUTPUT = $(BIN_DIR)/Program.elf
 
-# Compile source files to objects
-$(BIN_DIR)/%.o: $(SRC_DIR)/%.c
-	mkdir -p $(dir $@)
+# Target to build the program
+all: $(OUTPUT)
+
+# Linking object files to create the executable
+$(OUTPUT): $(OBJ_FILES)
+	$(CC) $(CFLAGS) -o $@ $(OBJ_FILES)
+
+# Compiling each source file into object files
+$(BIN_DIR)/main.o: $(SRC_DIR)/main.c
+	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(BIN_DIR)/%.o: $(LIB_DIR)/%.c
-	mkdir -p $(dir $@)
+$(BIN_DIR)/tcp_client.o: $(SRC_DIR)/tcp_client.c
+	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-# Link objects to create final image
-$(BIN_OUT): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+$(BIN_DIR)/udp_client.o: $(SRC_DIR)/udp_client.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-# Clean binary
+$(BIN_DIR)/sockets_lib.o: $(LIB_DIR)/sockets_lib.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+# Clean up
 clean:
-	rm -rf $(BIN_DIR)
-
-# Execute program
-run: $(BIN_OUT)
-	$< ${ARGS}
-
-# Recompile program
-re: clean $(BIN_OUT)
-
-# Recompile program and execute
-rer: clean run
-
-# Recompile program and execute via a debugger
-rerd: clean rund
-
-# Execute program via a debugger
-rund: $(BIN_OUT)
-	gdb -ex 'layout src' ${GDBF} --args $< ${ARGS}
-
-.PHONY: _all clean run re rer rerd rund
+	rm -rf $(BIN_DIR)/*.o $(OUTPUT)
