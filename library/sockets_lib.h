@@ -34,6 +34,7 @@ struct my_sockaddr_in {
     unsigned char sin_zero[8];    
 };
 
+int my_close(int sockfd);
 
 void *my_memset(void *s, int c, size_t n);
 
