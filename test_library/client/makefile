@@ -38,6 +38,10 @@ $(BIN_DIR)/sockets_lib.o: $(LIB_DIR)/sockets_lib.c
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+# Run the compiled program
+run: $(OUTPUT)
+	./$(OUTPUT)
+
 # Clean up
 clean:
 	rm -rf $(BIN_DIR)/*.o $(OUTPUT)
