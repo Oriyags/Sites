@@ -5,9 +5,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-int my_connect(const char *host, int port);
-int my_send(int sockfd, const char *data, int len);
-int my_receive(int sockfd, char *buffer, int buffer_len);
-void my_close(int sockfd);
+int my_connect(int sockfd, const void *addr, uint32_t addrlen);
+ssize_t my_send(int sockfd, const void *buf, size_t len, int flags);
+ssize_t my_recv(int sockfd, void *buf, size_t len, int flags);
+int my_close(int sockfd);
 
 #endif

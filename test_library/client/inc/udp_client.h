@@ -5,8 +5,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-int my_sendto(int sockfd, const char *data, int len);
-int my_recvfrom(int sockfd, char *buffer, int buffer_len);
-void my_close(int sockfd);
+ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const void *dest_addr, uint32_t addrlen);
+ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr, uint32_t *addrlen);
+int my_close(int sockfd);
 
 #endif

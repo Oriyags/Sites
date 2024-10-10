@@ -8,9 +8,10 @@
 // Utility function to handle UDP sending and receiving
 int udp_client() {
     int sockfd;
-    struct my_sockaddr_in servaddr;
+    struct my_sockaddr_in servaddr, src_addr;
     char buffer[1024] = {0};
     const char *message = "Hello from UDP client";
+    socklen_t addrlen = sizeof(src_addr);  // To store the length of the address
 
     // Create socket
     if ((sockfd = my_socket(MY_AF_INET, MY_SOCK_DGRAM, 0)) < 0) {
@@ -27,10 +28,10 @@ int udp_client() {
     printf("UDP client: Message sent\n");
 
     // Receive response
-    my_recvfrom(sockfd, buffer, 1024, 0, NULL, NULL);
+    my_recvfrom(sockfd, buffer, sizeof(buffer), 0, (struct my_sockaddr *)&src_addr, &addrlen);
     printf("UDP client: Message from server: %s\n", buffer);
 
     // Close socket
     my_close(sockfd);
     return 0;
-}
+}   
