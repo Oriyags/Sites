@@ -5,7 +5,6 @@
 
 #define PORT 8080
 
-// Utility function to handle TCP connection, sending, and receiving
 int tcp_client() {
     int sock = 0;
     struct my_sockaddr_in serv_addr;
@@ -18,25 +17,34 @@ int tcp_client() {
         return -1;
     }
 
+    // Prepare the sockaddr_in structure
     my_memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = MY_AF_INET;
     serv_addr.sin_port = my_htons(PORT);
+    my_inet_pton(MY_AF_INET, "127.0.0.1", &serv_addr.sin_addr);
 
     // Connect to server
     if (my_connect(sock, (struct my_sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        my_perror("Connection failed");
+        my_perror("Connection to server failed");
         return -1;
+    } else {
+        printf("Connection to server successful!\n");
     }
 
-    // Send message
+    // Send message to server
     my_send(sock, message, strlen(message), 0);
     printf("TCP client: Message sent\n");
 
-    // Receive message
-    my_recv(sock, buffer, 1024, 0);
-    printf("TCP client: Message from server: %s\n", buffer);
+    // Receive message from server
+    int valread = my_recv(sock, buffer, 1024, 0);
+    if (valread > 0) {
+        printf("TCP client: Message from server: %s\n", buffer);
+    } else {
+        my_perror("my_recv failed");
+    }
 
     // Close socket
     my_close(sock);
+
     return 0;
 }
