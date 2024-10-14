@@ -44,10 +44,13 @@ int sys_socket(int domain, int type, int protocol);
 int sys_bind(int sockfd, const struct my_sockaddr *addr, socklen_t addrlen);
 int sys_listen(int sockfd, int backlog);
 int sys_accept(int sockfd, void *addr, uint32_t *addrlen);
-int sys_connect(int sockfd, const void *addr, uint32_t *addrlen);
+int sys_connect(int sockfd, const struct my_sockaddr *addr, uint32_t addrlen);
 int sys_close(int sockfd);
 
-inline ssize_t sys_send(int sockfd, const void *buf, size_t len, int flags);
+ssize_t my_send(int sockfd, const void *buf, size_t len, int flags);
+ssize_t sys_recv(int sockfd, void *buf, size_t len, int flags);
+ssize_t sys_sendto(int sockfd, const void *buf, size_t len, int flags, const struct my_sockaddr *dest_addr, socklen_t addrlen);
+ssize_t sys_recvfrom(int sockfd, void *buf, size_t len, int flags, struct my_sockaddr *src_addr, socklen_t *addrlen);
 
 int my_socket(int domain, int type, int protocol);
 int my_bind(int sockfd, const struct my_sockaddr *addr, uint32_t addrlen);
@@ -59,9 +62,10 @@ int my_close(int sockfd);
 
 ssize_t my_send(int sockfd, const void *buf, size_t len, int flags);
 ssize_t my_recv(int sockfd, void *buf, size_t len, int flags);
-ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const void *dest_addr, uint32_t addrlen);
-ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, void *src_addr, uint32_t *addrlen);
+ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const struct my_sockaddr *dest_addr, socklen_t addrlen);
+ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, struct my_sockaddr *src_addr, socklen_t *addrlen);
 
+//optional
 void my_perror(const char *s);
 
 void *my_memset(void *s, int c, size_t n);
@@ -72,7 +76,7 @@ uint32_t my_ntohl(uint32_t netlong);
 uint16_t my_ntohs(uint16_t netshort);
 
 int my_inet_pton(int af, const char *src, void *dst);
-const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size);
+//const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size);
 
 int my_setsockopt(int sockfd, int level, int optname, const void *optval, uint32_t optlen);
 int my_getsockopt(int sockfd, int level, int optname, void *optval, uint32_t *optlen);
