@@ -93,16 +93,17 @@ int my_connect(int sockfd, const void *addr, uint32_t addrlen) {
 
 // Inline function to make a syscall for send
 inline ssize_t sys_send(int sockfd, const void *buf, size_t len, int flags) {
-    return syscall(__NR_sendto, sockfd, buf, len, flags, NULL, 0);
+    return syscall(__NR_sendto, sockfd, buf, len, flags);
 }
 
 // Send data over a TCP socket
 ssize_t my_send(int sockfd, const void *buf, size_t len, int flags) {
-    ssize_t result = sys_send(sockfd, buf, len, flags);  // Call the syscall to send data
+    // Use sys_sendto with NULL for dest_addr and 0 for addrlen to mimic send()
+    ssize_t result = syscall(__NR_sendto, sockfd, buf, len, flags, NULL, 0);
     if (result < 0) {
-        my_perror("my_send");  // Print an error message if send fails
+        my_perror("my_send");
     }
-    return result;  // Return the number of bytes sent
+    return result;
 }
 
 // Inline function to make a syscall for recv
@@ -112,12 +113,14 @@ inline ssize_t sys_recv(int sockfd, void *buf, size_t len, int flags) {
 
 // Receive data from a TCP socket
 ssize_t my_recv(int sockfd, void *buf, size_t len, int flags) {
-    ssize_t result = sys_recv(sockfd, buf, len, flags);  // Call the syscall to receive data
+    // Use sys_recvfrom with NULL for src_addr and NULL for addrlen to mimic recv()
+    ssize_t result = syscall(__NR_recvfrom, sockfd, buf, len, flags, NULL, NULL);
     if (result < 0) {
-        my_perror("my_recv");  // Print an error message if recv fails
+        my_perror("my_recv");
     }
-    return result;  // Return the number of bytes received
+    return result;
 }
+
 
 // Inline function to make a syscall for close
 inline int sys_close(int sockfd) {
