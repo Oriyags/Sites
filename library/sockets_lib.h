@@ -58,7 +58,6 @@ int my_listen(int sockfd, int backlog);
 int my_accept(int sockfd, void *addr, uint32_t *addrlen);
 int my_connect(int sockfd, const void *addr, uint32_t addrlen);
 int my_close(int sockfd);
-int my_close(int sockfd);
 
 ssize_t my_send(int sockfd, const void *buf, size_t len, int flags);
 ssize_t my_recv(int sockfd, void *buf, size_t len, int flags);
