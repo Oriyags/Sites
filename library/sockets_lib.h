@@ -75,11 +75,6 @@ uint32_t my_ntohl(uint32_t netlong);
 uint16_t my_ntohs(uint16_t netshort);
 
 int my_inet_pton(int af, const char *src, void *dst);
-//const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size);
-
-int my_setsockopt(int sockfd, int level, int optname, const void *optval, uint32_t optlen);
-int my_getsockopt(int sockfd, int level, int optname, void *optval, uint32_t *optlen);
-
-int my_fcntl(int sockfd, int cmd, long arg);
+const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size);
 
 #endif

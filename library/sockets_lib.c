@@ -204,13 +204,14 @@ uint32_t my_ntohl(uint32_t netlong) {
     return my_htonl(netlong);               // Network byte order is big-endian
 }
 
+//(Not in use right now, probably later)
 // Convert a 16-bit value from network byte order to host byte order
 uint16_t my_ntohs(uint16_t netshort) {
     return my_htons(netshort);  // Network byte order is big-endian
 }
 
 // IPv4 support for inet_pton
-// Convert an IPv4 address from presentation format to network format
+// Convert an IPv4 address from presentation (string) format to network (binary) format
 int my_inet_pton(int af, const char *src, void *dst) {
     if (af == AF_INET) {  // Check if the address family is AF_INET
         struct my_in_addr *addr = (struct my_in_addr *)dst;  // Cast destination to my_in_addr
@@ -227,7 +228,7 @@ int my_inet_pton(int af, const char *src, void *dst) {
 }
 
 // IPv4 support for inet_ntop
-// Convert an IPv4 address from network format to presentation format
+// Convert an IPv4 address from network (binary) format to presentation (string) format
 const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size) {
     if (af == AF_INET) {  // Check if the address family is AF_INET
         const struct my_in_addr *addr = (const struct my_in_addr *)src;  // Cast source to my_in_addr
@@ -244,33 +245,4 @@ const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size) {
     }
     my_perror("my_inet_ntop - Only AF_INET is supported");  // Print an error message if address family is not AF_INET
     return NULL;  // Return NULL to indicate failure
-}
-
-// Socket Option Management
-// Set socket options
-int my_setsockopt(int sockfd, int level, int optname, const void *optval, uint32_t optlen) {
-    int result = syscall(__NR_setsockopt, sockfd, level, optname, optval, optlen);  // Call the syscall to set socket options
-    if (result < 0) {
-        my_perror("my_setsockopt");  // Print an error message if setsockopt fails
-    }
-    return result;  // Return the result of the setsockopt operation
-}
-
-// Get socket options
-int my_getsockopt(int sockfd, int level, int optname, void *optval, uint32_t *optlen) {
-    int result = syscall(__NR_getsockopt, sockfd, level, optname, optval, optlen);  // Call the syscall to get socket options
-    if (result < 0) {
-        my_perror("my_getsockopt");  // Print an error message if getsockopt fails
-    }
-    return result;  // Return the result of the getsockopt operation
-}
-
-// Control non-blocking mode using fcntl (file control)
-// Set or get file descriptor flags
-int my_fcntl(int sockfd, int cmd, long arg) {
-    int result = syscall(__NR_fcntl, sockfd, cmd, arg);  // Call the syscall to control file descriptor
-    if (result < 0) {
-        my_perror("my_fcntl");  // Print an error message if fcntl fails
-    }
-    return result;  // Return the result of the fcntl operation
 }
