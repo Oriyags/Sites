@@ -188,10 +188,10 @@ void *my_memset(void *s, int c, size_t n) {
 // Byte Order Functions
 // Convert a 32-bit value from host byte order to network byte order (big-endian)
 uint32_t my_htonl(uint32_t hostlong) {
-    return ((hostlong & 0xff) << 24) |
+    return ((hostlong & 0xff) << 24) | //LSB
            ((hostlong & 0xff00) << 8) |
            ((hostlong & 0xff0000) >> 8) |
-           ((hostlong & 0xff000000) >> 24);
+           ((hostlong & 0xff000000) >> 24); //MSB
 }
 
 // Convert a 16-bit value from host byte order to network byte order (big-endian)
