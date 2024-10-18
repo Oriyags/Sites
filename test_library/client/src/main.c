@@ -24,13 +24,13 @@ int main(int argc, char *argv[]) {
 
     // Create a sockaddr_in structure for the server address
     struct my_sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
+    server_addr.sin_family = MY_AF_INET;
     server_addr.sin_port = my_htons(port);  // Use my_htons for port conversion
-    my_inet_pton(AF_INET, host, &server_addr.sin_addr);  // Use my_inet_pton
+    my_inet_pton(MY_AF_INET, host, &server_addr.sin_addr);  // Use my_inet_pton
 
     // If the program is running as ./tcp_server, handle only TCP
     if (is_tcp(argv[0])) {
-        int tcp_socket = my_socket(AF_INET, SOCK_STREAM, 0);
+        int tcp_socket = my_socket(MY_AF_INET, MY_SOCK_STREAM, 0);
         if (tcp_socket >= 0) {
             if (my_connect(tcp_socket, (struct my_sockaddr*)&server_addr, sizeof(server_addr)) >= 0) {
                 const char *message = "Hello, TCP!";
