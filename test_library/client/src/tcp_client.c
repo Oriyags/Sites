@@ -1,7 +1,8 @@
-#include "tcp_client.h"
 #include "sockets_lib.h"
+#include "tcp_client.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #define PORT 8080
 

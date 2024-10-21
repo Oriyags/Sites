@@ -1,6 +1,6 @@
-#include "../../../library/sockets_lib.h"
-#include "../inc/udp_client.h"
-#include "../inc/tcp_client.h"
+#include "sockets_lib.h"
+#include "udp_client.h"
+#include "tcp_client.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -24,9 +24,9 @@ int main(int argc, char *argv[]) {
 
     // Create a sockaddr_in structure for the server address
     struct my_sockaddr_in server_addr;
-    server_addr.sin_family = MY_AF_INET;
+    server_addr.sin_family = AF_INET;
     server_addr.sin_port = my_htons(port);  // Use my_htons for port conversion
-    my_inet_pton(MY_AF_INET, host, &server_addr.sin_addr);  // Use my_inet_pton
+    my_inet_pton(AF_INET, host, &server_addr.sin_addr);  // Use my_inet_pton
 
     // If the program is running as ./tcp_server, handle only TCP
     if (is_tcp(argv[0])) {
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 
     // If the program is running as ./udp_server, handle only UDP
     if (is_udp(argv[0])) {
-        int udp_socket = my_socket(AF_INET, SOCK_DGRAM, 0);
+        int udp_socket = my_socket(MY_AF_INET, MY_SOCK_DGRAM, 0);
         if (udp_socket >= 0) {
             const char *message = "Hello, UDP!";
             if (my_sendto(udp_socket, message, strlen(message), 0, (struct my_sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
