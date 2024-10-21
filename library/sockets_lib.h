@@ -1,19 +1,25 @@
 #ifndef SOCKETS_LIB_H
 #define SOCKETS_LIB_H
 
+#include "socket_management.h"
+#include "data_transmission.h"
+#include "socket_utils.h"
+#include "memory_management.h"
+#include "syscall_wrappers.h"
+
 #include <sys/types.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <unistd.h>
-#include <stdio.h>   
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define MY_AF_INET 2
-#define MY_SOCK_STREAM 1
-#define MY_SOCK_DGRAM 2
-#define MY_INET_ADDRSTRLEN 16
-#define MY_INADDR_ANY ((unsigned long) 0x00000000)
+#define MY_AF_INET 2                          // Address family for IPv4
+#define MY_SOCK_STREAM 1                      // Socket type for TCP connections
+#define MY_SOCK_DGRAM 2                       // Socket type for UDP connections
+#define MY_INET_ADDRSTRLEN 16                 // Length of an IPv4 address in string format
+#define MY_INADDR_ANY ((uint32_t)0x00000000)  // Bind to all available interfaces
 
 #define MY_SOL_SOCKET 1
 #define MY_SO_REUSEADDR 2
@@ -38,43 +44,5 @@ struct my_sockaddr_in {
     struct my_in_addr sin_addr;   // IPv4 address
     unsigned char sin_zero[8];    // Padding (zeroed)
 };
-
-// Custom wrapper for system call
-int sys_socket(int domain, int type, int protocol);
-int sys_bind(int sockfd, const struct my_sockaddr *addr, socklen_t addrlen);
-int sys_listen(int sockfd, int backlog);
-int sys_accept(int sockfd, void *addr, uint32_t *addrlen);
-int sys_connect(int sockfd, const struct my_sockaddr *addr, uint32_t addrlen);
-int sys_close(int sockfd);
-
-ssize_t sys_send(int sockfd, const void *buf, size_t len, int flags);
-ssize_t sys_recv(int sockfd, void *buf, size_t len, int flags);
-ssize_t sys_sendto(int sockfd, const void *buf, size_t len, int flags, const struct my_sockaddr *dest_addr, socklen_t addrlen);
-ssize_t sys_recvfrom(int sockfd, void *buf, size_t len, int flags, struct my_sockaddr *src_addr, socklen_t *addrlen);
-
-int my_socket(int domain, int type, int protocol);
-int my_bind(int sockfd, const struct my_sockaddr *addr, uint32_t addrlen);
-int my_listen(int sockfd, int backlog);
-int my_accept(int sockfd, void *addr, uint32_t *addrlen);
-int my_connect(int sockfd, const void *addr, uint32_t addrlen);
-int my_close(int sockfd);
-
-ssize_t my_send(int sockfd, const void *buf, size_t len, int flags);
-ssize_t my_recv(int sockfd, void *buf, size_t len, int flags);
-ssize_t my_sendto(int sockfd, const void *buf, size_t len, int flags, const struct my_sockaddr *dest_addr, socklen_t addrlen);
-ssize_t my_recvfrom(int sockfd, void *buf, size_t len, int flags, struct my_sockaddr *src_addr, socklen_t *addrlen);
-
-//optional
-void my_perror(const char *s);
-
-void *my_memset(void *s, int c, size_t n);
-
-uint32_t my_htonl(uint32_t hostlong);
-uint16_t my_htons(uint16_t hostshort);
-uint32_t my_ntohl(uint32_t netlong);
-uint16_t my_ntohs(uint16_t netshort);
-
-int my_inet_pton(int af, const char *src, void *dst);
-const char *my_inet_ntop(int af, const void *src, char *dst, uint32_t size);
 
 #endif
