@@ -6,6 +6,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-int my_close(int sockfd);
+int udp_client();
 
 #endif
