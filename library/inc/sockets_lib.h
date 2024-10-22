@@ -1,14 +1,8 @@
 #ifndef SOCKETS_LIB_H
 #define SOCKETS_LIB_H
 
-#include "socket_management.h"
-#include "data_transmission.h"
-#include "socket_utils.h"
-#include "memory_management.h"
-#include "syscall_wrappers.h"
-
-#include <sys/types.h>
 #include <stdint.h>
+#include <sys/types.h>
 #include <stddef.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -44,5 +38,11 @@ struct my_sockaddr_in {
     struct my_in_addr sin_addr;   // IPv4 address
     unsigned char sin_zero[8];    // Padding (zeroed)
 };
+
+#include "socket_management.h"
+#include "data_transmission.h"
+#include "socket_utils.h"
+#include "memory_management.h"
+#include "syscall_wrappers.h"
 
 #endif
