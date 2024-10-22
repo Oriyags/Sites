@@ -1,3 +1,19 @@
+#Makefiles steps:
+#1. Define Variables
+#2. Set Up Directories
+#3. Specify Source Files
+#4. Define Object Files
+#5. Output Binaries
+#6. Build Targets
+#7. Compile Source Files into Object Files
+#8. Link Object Files to Create Executables
+#9. Run Targets
+#10. Clean Up
+#11. Phony Targets
+#12. Conditional Statements
+#13. Include Other Makefiles
+#---------------------------------------------
+
 # Compiler and flags
 CC = gcc
 CFLAGS = -Iinc -I../../library/inc -g -Wall -Wextra
